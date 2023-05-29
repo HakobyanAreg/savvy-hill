@@ -1,70 +1,93 @@
-import './Main.scss'
-import { FC, useCallback, useEffect, useState } from "react";
-import { useTypedSelector } from "../../hooks/useTypedSelector";
-import { useActions } from "../../hooks/useActions";
+import React, { Component } from 'react';
+import './Main.scss';
+import { bindActionCreators, Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { fetchClients, setDatLanguage, setDatLimit } from '../../store/action-craetors/client';
+import { RootState } from '../../store/reducers';
 import { Client } from '../../types/client';
-
-export const Main: FC = () => {
-    const { clients, loading, error, lang, limit } = useTypedSelector(state => state.clients)
-    const {fetchClients, setDatLimit, setDatLanguage} = useActions()
-    const [page, setPage] = useState<string>('Min')
-    const pages = ['Min', 'Mid', 'Max']
-
-    useEffect(() => {
-        setDatLanguage('ru')
-        setDatLimit('min')
-
-    }, [])
-
-    useEffect(() => {
-        fetchClients(lang, limit)
-        
-    }, [lang, limit])
+import {MainProps} from "./types";
 
 
-    const formatFullName = (fullName: string): string => {
+class Main extends Component<MainProps> {
+    state = {
+        page: 'Min',
+    };
+
+    pages = ['Min', 'Mid', 'Max'];
+
+    componentDidMount() {
+        const { setDatLanguage, setDatLimit } = this.props;
+        setDatLanguage('ru');
+        setDatLimit('min');
+        this.fetchClientsData();
+    }
+
+    componentDidUpdate(prevProps: MainProps) {
+        if (prevProps.lang !== this.props.lang || prevProps.limit !== this.props.limit) {
+            this.fetchClientsData();
+        }
+    }
+
+    fetchClientsData() {
+        const { lang, limit, fetchClients } = this.props;
+        fetchClients(lang, limit);
+    }
+
+    formatFullName(fullName: string): string {
         const lastName = fullName.split(' ')[0];
         const firstName = !!fullName.split(' ')[1] ? fullName.split(' ')[1][0] : '';
-        return `${lastName} ${firstName}`
+        return `${lastName} ${firstName}`;
     }
 
-    const handleClick = useCallback((e: React.MouseEvent<HTMLSpanElement>): void => {
+    handleClick = (e: React.MouseEvent<HTMLSpanElement>): void => {
         const value = (e.target as HTMLElement).innerText;
-        setPage(value);
-        setDatLimit( value.toLocaleLowerCase())
-    }, [page])
+        this.setState({ page: value });
+        this.props.setDatLimit(value.toLowerCase());
+    };
 
-    if(loading) {
-        return <h1>... Loading</h1>
-    }
+    render() {
+        const { clients, loading, error } = this.props;
+        const { page } = this.state;
 
+        if (loading) {
+            return <h1>... Loading</h1>;
+        }
 
-    if(error) {
-        return <h1>{error}</h1>
-    }
+        if (error) {
+            return <h1>{error}</h1>;
+        }
 
-    return (
-        <div className="main">
-            {(clients as Client[]).map((client: Client, index: number) => (
-                <div className="clients-wrapper" key={`${client.name}_${index}`}>
-                    <span>
-                        {formatFullName(client.name)}
-                    </span>
-                    <span>
-                        {client.review}
-                    </span>
-                    <span>
-                        {client.date}
-                    </span>
-                </div>
-            ))}
-            <div className="pagination">
-                {pages.map((p: string, index: number) => (
-                    <span key={`${p}_${index}`} onClick={handleClick} className={p === page ? 'selected' : ''}>
-                        {p}
-                    </span>
+        return (
+            <div className="main">
+                {clients.map((client: Client, index: number) => (
+                    <div className="clients-wrapper" key={`${client.name}_${index}`}>
+                        <span>{this.formatFullName(client.name)}</span>
+                        <span>{client.review}</span>
+                        <span>{client.date}</span>
+                    </div>
                 ))}
+                <div className="pagination">
+                    {this.pages.map((p: string, index: number) => (
+                        <span key={`${p}_${index}`} onClick={this.handleClick} className={p === page ? 'selected' : ''}>
+              {p}
+            </span>
+                    ))}
+                </div>
             </div>
-        </div>
-    )
+        );
+    }
 }
+
+const mapStateToProps = (state: RootState) => ({
+    clients: state.clients.clients,
+    loading: state.clients.loading,
+    error: state.clients.error,
+    lang: state.clients.lang,
+    limit: state.clients.limit,
+});
+
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return bindActionCreators({ fetchClients, setDatLanguage, setDatLimit }, dispatch);
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Main);

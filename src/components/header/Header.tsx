@@ -1,36 +1,39 @@
-import "./Header.scss"
-import { FC } from "react"
-import { Watch } from "../watch/Watch"
-import clientLogo from "./../../assets/images/client.png"
-import { useActions } from "../../hooks/useActions"
-import data from './../../data/data.json'
-import { useTypedSelector } from "../../hooks/useTypedSelector"
+import "./Header.scss";
+import React, { Component } from 'react';
+import clientLogo from "./../../assets/images/client.png";
+import { bindActionCreators, Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { setDatLanguage } from "../../store/action-craetors/client";
+import data from './../../data/data.json';
+import Watch from "../watch/Watch";
+import {HeaderProps} from "./types";
 
-export const Header: FC = () => {
+class Header extends Component<HeaderProps> {
+    handleClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+        const lang = (e.target as HTMLElement).innerText.toLowerCase() as keyof typeof data;
+        this.props.setDatLanguage(lang);
+    };
 
-    const {setDatLanguage} = useActions()
-
-    const handleClick = (e: React.MouseEvent<HTMLSpanElement>) => {
-        const lang = (e.target as HTMLElement).innerText.toLocaleLowerCase() as keyof typeof data
-        setDatLanguage(lang)
+    render() {
+        return (
+            <header>
+                <div className="logo-wrapper">
+                    <img src={clientLogo} alt="Client Logo" />
+                </div>
+                <div className="watch-wrapper">
+                    <Watch />
+                </div>
+                <div className="language-wrapper">
+                    <span onClick={this.handleClick}>en</span>
+                    <span onClick={this.handleClick}>ru</span>
+                </div>
+            </header>
+        );
     }
-    
-    return (
-        <header>
-            <div className="logo-wrapper">
-                <img src={clientLogo} alt="Client Logo" />
-            </div>
-            <div className="watch-wrapper">
-                <Watch />
-            </div>
-            <div className="language-wrapper">
-                <span onClick={handleClick}>
-                    en
-                </span>
-                <span onClick={handleClick}>
-                    ru
-                </span>
-            </div>
-        </header>
-    )
 }
+
+const mapDispatchToProps = (dispatch: Dispatch) => {
+    return bindActionCreators({ setDatLanguage }, dispatch);
+};
+
+export default connect(null, mapDispatchToProps)(Header);

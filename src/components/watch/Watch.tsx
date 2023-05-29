@@ -1,16 +1,30 @@
-import "./Watch.scss"
-import { FC, useEffect, useState } from "react";
+import React, { Component } from 'react';
+import "./Watch.scss";
 
-export const Watch: FC = () => {
-    const [date, setDate] = useState(new Date().toLocaleTimeString())
+class Watch extends Component {
+    state = {
+        date: new Date().toLocaleTimeString(),
+    };
 
-    useEffect(() => {
-           setInterval(() => setDate(new Date().toLocaleTimeString()), 1000);
-    }, []);
+    interval: NodeJS.Timeout | null = null;
 
-    return (
-        <div className="watch">
-            {date}
-        </div>
-    )
+    componentDidMount() {
+        this.interval = setInterval(() => {
+            this.setState({ date: new Date().toLocaleTimeString() });
+        }, 1000);
+    }
+
+    componentWillUnmount() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+    }
+
+    render() {
+        const { date } = this.state;
+
+        return <div className="watch">{date}</div>;
+    }
 }
+
+export default Watch;

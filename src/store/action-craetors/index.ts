@@ -1,3 +1,3 @@
-import { fetchClients, setDatLanguage, setDatLimit } from "./client"
+import { fetchClients, setDatLanguage, setDatLimit } from "./client";
 
-export default {fetchClients, setDatLimit, setDatLanguage}
+export default { fetchClients, setDatLimit, setDatLanguage };

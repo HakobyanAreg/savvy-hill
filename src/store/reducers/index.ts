@@ -2,10 +2,7 @@ import { combineReducers } from "redux";
 import { clientReducer } from "./clientReducer";
 
 export const rootReducer = combineReducers({
-    clients: clientReducer
-})
+    clients: clientReducer,
+});
 
-export type RootType = ReturnType<typeof rootReducer>
-
-
-
+export type RootState = ReturnType<typeof rootReducer>;

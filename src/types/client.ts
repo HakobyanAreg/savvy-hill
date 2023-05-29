@@ -1,7 +1,9 @@
+import data from "../data/data.json";
+
 export interface ClientState {
     clients: Client[],
     limit: string,
-    lang: string,
+    lang: keyof typeof data,
     loading: boolean,
     error: null | string
 }
@@ -45,7 +47,7 @@ export interface SetDataLimit {
 
 export interface SetDataLimitSuccess {
     type: ClientActionTypes.SET_DATA_LIMIT_SUCCESS,
-    payload: number,
+    payload: string,
 }
 
 export interface SetDataLimitError {
